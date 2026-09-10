@@ -1,0 +1,156 @@
+# dashboard-kit-addon-geoip
+
+GeoIP middleware and log enrichment addon for [dashboard-kit](https://github.com/rafalmasiarek/php-dashboard-kit).
+
+Resolves the client IP to country, city, and region on every request. Stores results in `$_SERVER` (compatible with nginx `ngx_http_geoip_module`) and enriches all Monolog log channels with geo context fields.
+
+## Installation
+
+```bash
+composer require rafalmasiarek/dashboard-kit-addon-geoip
+```
+
+For the built-in MaxMind driver, also install:
+
+```bash
+composer require geoip2/geoip2
+```
+
+Download a free [GeoLite2-City.mmdb](https://dev.maxmind.com/geoip/geolite2-free-geolocation-data) database from MaxMind.
+
+## Usage
+
+```php
+use rafalmasiarek\DashboardKit\Dashboard;
+use rafalmasiarek\DashboardKitGeoIp\GeoIpAddon;
+
+$dashboard = Dashboard::create(__DIR__ . '/../', [
+    'geoip' => [
+        'db_path'  => __DIR__ . '/../storage/GeoLite2-City.mmdb',
+        'log_days' => 30,
+    ],
+]);
+
+GeoIpAddon::register($dashboard->getApp(), $dashboard->getContainer());
+
+$dashboard->run();
+```
+
+## Custom driver
+
+Bind a custom driver before calling `register()`. The built-in MaxMind driver is skipped automatically.
+
+```php
+use rafalmasiarek\DashboardKitGeoIp\GeoIpAddon;
+use rafalmasiarek\DashboardKitGeoIp\GeoIpDriverInterface;
+use rafalmasiarek\DashboardKitGeoIp\GeoIpResult;
+
+final class MyDriver implements GeoIpDriverInterface
+{
+    public function resolve(string $ip): GeoIpResult
+    {
+        // never throw — return empty GeoIpResult on any failure
+        return new GeoIpResult(
+            country:     'Poland',
+            countryCode: 'PL',
+            city:        'Warsaw',
+            region:      'Masovian Voivodeship',
+        );
+    }
+}
+
+$container->set(GeoIpDriverInterface::class, fn() => new MyDriver());
+GeoIpAddon::register($dashboard->getApp(), $container);
+```
+
+### HTTP driver tips
+
+For HTTP-based drivers (ip-api.com, ipinfo.io, custom API):
+
+- Use cURL — supports HTTPS and configurable timeout
+- Accept a configurable URL template with `%s` for the IP
+- Point the URL at a Cloudflare Worker to get automatic retries, HTTPS, and rate-limit handling
+
+```php
+final class IpApiDriver implements GeoIpDriverInterface
+{
+    public function __construct(
+        private readonly string $url       = 'http://ip-api.com/json/%s?fields=country,countryCode,city,regionName',
+        private readonly int    $timeoutMs = 3000,
+    ) {}
+
+    public function resolve(string $ip): GeoIpResult { ... }
+}
+
+// point at CF Worker for retries and HTTPS:
+$container->set(GeoIpDriverInterface::class, fn() => new IpApiDriver(
+    url: 'https://geoip.example.workers.dev/%s',
+));
+```
+
+## $_SERVER keys
+
+After the middleware runs, the following keys are available globally:
+
+| Key                    | Example value              |
+|------------------------|----------------------------|
+| `GEOIP_COUNTRY`        | `Poland`                   |
+| `GEOIP_COUNTRY_CODE`   | `PL`                       |
+| `GEOIP_CITY`           | `Warsaw`                   |
+| `GEOIP_REGION`         | `Masovian Voivodeship`     |
+
+Keys already set by nginx or Cloudflare are never overwritten.
+
+## Log enrichment
+
+All Monolog channels (`app`, `audit`, `error`) automatically receive geo context on every log record:
+
+```
+req.country      — full country name
+req.country_code — ISO 3166-1 alpha-2 code
+req.city         — city name
+```
+
+### geoip.log
+
+Each driver call produces one audit line in `{logs_dir}/geoip.log`:
+
+```
+[2026-07-17 12:34:56] [level=info] [channel=geoip] resolved req.id=550e8400-... req.ip=1.2.3.4 duration_ms=42.3 country=Poland country_code=PL city=Warsaw region=Masovian\ Voivodeship
+```
+
+`req.id` appears automatically when [dashboard-kit-request-id](https://github.com/rafalmasiarek/php-dashboard-kit-addon-request-id) is registered before this addon.
+
+### Custom log formatter
+
+Default format is `KvLineFormatter` (key=value lines). Override before `register()`:
+
+```php
+use Monolog\Formatter\JsonFormatter;
+
+$container->set('geoip.log.formatter', fn() => new JsonFormatter());
+GeoIpAddon::register($dashboard->getApp(), $container);
+```
+
+## Configuration reference
+
+```php
+'geoip' => [
+    'db_path'  => '/path/to/GeoLite2-City.mmdb',  // required for MaxMindDriver; omit to disable plugin
+    'log_days' => 30,                               // geoip.log retention in days
+],
+```
+
+When `db_path` is not set and no custom driver is bound in the container, `GeoIpAddon::register()` does nothing — no middleware is added and no log processor is registered. This allows the addon call to remain in `index.php` without crashing when the database file is not yet available.
+
+## Requirements
+
+- PHP 8.2+
+- dashboard-kit
+- monolog/monolog ^3
+- geoip2/geoip2 ^4.0 _(only for MaxMindDriver)_
+
+## License
+
+Business Source License 1.1 — see [LICENSE](LICENSE).
+For alternative licensing, [contact us](https://masiarek.pl/contact/?af_subject=Commercial+license+%E2%80%94+dashboard-kit-addon-geoip&af_message=Hello%2C+I+am+interested+in+a+commercial+license+for+dashboard-kit-addon-geoip.).
