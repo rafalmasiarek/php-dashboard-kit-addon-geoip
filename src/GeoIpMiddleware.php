@@ -39,11 +39,16 @@ final class GeoIpMiddleware implements MiddlewareInterface
      *   RealIpResolver (handles X-Forwarded-For, Cloudflare, RFC 7239) instead of reading
      *   REMOTE_ADDR directly. Injected automatically by GeoIpAddon when dashboard-kit binds
      *   RealIpResolver in the container.
+     * @param bool $debug When false (default), the per-resolution audit line is never
+     *   written — this middleware runs on every request, so logging unconditionally would
+     *   make it the dominant source of noise on the geoip channel. Set true (geoip.debug in
+     *   app config) to see it.
      */
     public function __construct(
         private readonly GeoIpDriverInterface $driver,
         private readonly ?LoggerInterface $logger = null,
         private readonly ?RealIpResolver $resolver = null,
+        private readonly bool $debug = false,
     ) {
     }
 
@@ -76,15 +81,17 @@ final class GeoIpMiddleware implements MiddlewareInterface
                 $_SERVER['GEOIP_CITY']         ??= $result->city;
                 $_SERVER['GEOIP_REGION']       ??= $result->region;
 
-                $this->logger?->info('resolved', [
-                    'req.ip'       => $ip,
-                    'source'       => 'middleware',
-                    'duration_ms'  => $ms,
-                    'country'      => $result->country,
-                    'country_code' => $result->countryCode,
-                    'city'         => $result->city,
-                    'region'       => $result->region,
-                ]);
+                if ($this->debug) {
+                    $this->logger?->info('geoip.resolve.ok', [
+                        'req.ip'       => $ip,
+                        'source'       => 'middleware',
+                        'duration_ms'  => $ms,
+                        'country'      => $result->country,
+                        'country_code' => $result->countryCode,
+                        'city'         => $result->city,
+                        'region'       => $result->region,
+                    ]);
+                }
             }
         }
 
