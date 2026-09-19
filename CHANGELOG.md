@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.2](https://github.com/rafalmasiarek/php-dashboard-kit-addon-geoip/compare/v1.0.1...v1.0.2) (2026-09-19)
+
+
+### Bug Fixes
+
+* **log:** reuse the app's own geoip channel and gate per-request logging ([#5](https://github.com/rafalmasiarek/php-dashboard-kit-addon-geoip/issues/5)) ([dbe14d6](https://github.com/rafalmasiarek/php-dashboard-kit-addon-geoip/commit/dbe14d60bc44368c5c77f01d0b91130d6025899e))
+
 ## [1.0.1](https://github.com/rafalmasiarek/php-dashboard-kit-addon-geoip/compare/v1.0.0...v1.0.1) (2026-09-13)
 
 
