@@ -9,6 +9,7 @@ use Monolog\Handler\RotatingFileHandler;
 use Monolog\Level;
 use Monolog\Logger;
 use Psr\Container\ContainerInterface;
+use rafalmasiarek\DashboardKit\Log\SecretRedactionProcessor;
 use rafalmasiarek\DashboardKitGeoIp\Log\KvLineFormatter;
 use rafalmasiarek\DashboardKitGeoIp\Driver\MaxMindDriver;
 use rafalmasiarek\RealIpResolver;
@@ -26,8 +27,16 @@ use Slim\App;
  *   $container->set(GeoIpDriverInterface::class, fn() => new IpApiDriver());
  *   GeoIpAddon::register($dashboard->getApp(), $container);
  *
- * Creates a dedicated logger.geoip channel writing to {logs_dir}/geoip.log.
- * Each driver call produces one audit line with ip, duration_ms, country, city, status.
+ * Uses the app's own logger.geoip channel when Dashboard::create() already
+ * registered one (config['logging']['geoip']) — so this channel gets the same
+ * processors (SecretRedactionProcessor, RequestHeadersProcessor) as every
+ * other channel. Falls back to a standalone logger writing to
+ * {logs_dir}/geoip.log (still protected by SecretRedactionProcessor) when the
+ * app didn't configure that channel.
+ *
+ * The per-resolution audit line (one per driver call, with ip, duration_ms,
+ * country, city) is only written when geoip.debug is true — the middleware
+ * runs on every request, so logging unconditionally would dominate the channel.
  * When log.processor.request_id is bound in the container (RequestIdAddon registered
  * before this addon), req.id is included in every geoip log line automatically.
  *
@@ -78,16 +87,31 @@ final class GeoIpAddon
             }
         }
 
-        $geoipLogger = self::buildLogger($container);
-        $container->set('logger.geoip', static fn() => $geoipLogger);
+        // Prefer a logger.geoip already registered by Dashboard::create() (from
+        // config['logging']['geoip']) so this channel gets the same processors
+        // (SecretRedactionProcessor, RequestHeadersProcessor) as every other
+        // channel. Only build a standalone one as a fallback when the app didn't
+        // configure that channel — still redaction-protected either way.
+        $hasSharedLogger = $container->has('logger.geoip');
+        $geoipLogger     = $hasSharedLogger ? $container->get('logger.geoip') : self::buildLogger($container);
+
+        if (!$hasSharedLogger) {
+            $container->set('logger.geoip', static fn() => $geoipLogger);
+        }
+
+        $geoipConfig = (array) ($container->get('app.config')['geoip'] ?? []);
+        $debug       = (bool) ($geoipConfig['debug'] ?? false);
 
         $resolver = $container->has(RealIpResolver::class) ? $container->get(RealIpResolver::class) : null;
-        $app->add(new GeoIpMiddleware($driver, $geoipLogger, $resolver));
+        $app->add(new GeoIpMiddleware($driver, $geoipLogger, $resolver, $debug));
     }
 
     /**
-     * Builds the dedicated geoip audit logger.
+     * Builds a standalone geoip audit logger, used only when the app hasn't
+     * already registered its own logger.geoip channel via Dashboard::create().
      *
+     * Pushes SecretRedactionProcessor directly since this logger bypasses the
+     * app's own channel-creation loop where that would otherwise be applied.
      * Picks up log.processor.request_id from the container when available
      * so every geoip log line carries req.id for cross-log correlation.
      *
@@ -122,6 +146,7 @@ final class GeoIpAddon
 
         $logger = new Logger('geoip');
         $logger->pushHandler($handler);
+        $logger->pushProcessor(new SecretRedactionProcessor());
 
         try {
             $reqIdProcessor = $container->get('log.processor.request_id');
