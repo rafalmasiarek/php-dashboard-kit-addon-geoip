@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.5](https://github.com/rafalmasiarek/php-dashboard-kit-addon-geoip/compare/v1.0.4...v1.0.5) (2026-10-05)
+
+
+### Bug Fixes
+
+* **deps:** allow dashboard-kit ^5.0 ([#10](https://github.com/rafalmasiarek/php-dashboard-kit-addon-geoip/issues/10)) ([81deb96](https://github.com/rafalmasiarek/php-dashboard-kit-addon-geoip/commit/81deb969f4b843d06b3d1c234ca755507def2c70))
+
 ## [1.0.4](https://github.com/rafalmasiarek/php-dashboard-kit-addon-geoip/compare/v1.0.3...v1.0.4) (2026-10-04)
 
 
