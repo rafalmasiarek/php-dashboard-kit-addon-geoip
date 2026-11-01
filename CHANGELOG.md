@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.6](https://github.com/rafalmasiarek/php-dashboard-kit-addon-geoip/compare/v1.0.5...v1.0.6) (2026-11-01)
+
+
+### Miscellaneous Chores
+
+* **deps:** accept any dashboard-kit &gt;=2.1, not just the current major ([#13](https://github.com/rafalmasiarek/php-dashboard-kit-addon-geoip/issues/13)) ([baf127f](https://github.com/rafalmasiarek/php-dashboard-kit-addon-geoip/commit/baf127f2505db0d4cf88dc0090d04d7a8b1aca1f))
+
 ## [1.0.5](https://github.com/rafalmasiarek/php-dashboard-kit-addon-geoip/compare/v1.0.4...v1.0.5) (2026-10-05)
 
 
