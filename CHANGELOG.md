@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.0.7](https://github.com/rafalmasiarek/php-dashboard-kit-addon-geoip/compare/v1.0.6...v1.0.7) (2026-11-17)
+
+
+### Bug Fixes
+
+* rename includes to footer_includes in README.yml ([#16](https://github.com/rafalmasiarek/php-dashboard-kit-addon-geoip/issues/16)) ([17c32c8](https://github.com/rafalmasiarek/php-dashboard-kit-addon-geoip/commit/17c32c8f0196705602fa058e6751b6419aa7ee61))
+
 ## [1.0.6](https://github.com/rafalmasiarek/php-dashboard-kit-addon-geoip/compare/v1.0.5...v1.0.6) (2026-11-01)
 
 
