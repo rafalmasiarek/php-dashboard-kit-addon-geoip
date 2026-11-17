@@ -1,12 +1,47 @@
 # dashboard-kit-addon-geoip
+
+
 [![Packagist Version](https://img.shields.io/packagist/v/rafalmasiarek/dashboard-kit-addon-geoip)](https://packagist.org/packages/rafalmasiarek/dashboard-kit-addon-geoip)
 [![Total Downloads](https://img.shields.io/packagist/dt/rafalmasiarek/dashboard-kit-addon-geoip)](https://packagist.org/packages/rafalmasiarek/dashboard-kit-addon-geoip)
 [![PHP](https://img.shields.io/packagist/php-v/rafalmasiarek/dashboard-kit-addon-geoip)](https://packagist.org/packages/rafalmasiarek/dashboard-kit-addon-geoip)
 [![License](https://img.shields.io/badge/license-BUSL--1.1-red)](https://github.com/rafalmasiarek/php-dashboard-kit-addon-geoip/blob/main/LICENSE)
 
+
+
+
+
+
+
 GeoIP middleware and log enrichment addon for [dashboard-kit](https://github.com/rafalmasiarek/php-dashboard-kit).
 
 Resolves the client IP to country, city, and region on every request. Stores results in `$_SERVER` (compatible with nginx `ngx_http_geoip_module`) and enriches all Monolog log channels with geo context fields.
+
+
+
+
+
+
+
+## License
+
+![License: BUSL-1.1](https://img.shields.io/badge/license-BUSL--1.1-red)
+
+Business Source License 1.1.
+
+Source available; commercial use restricted until 2099-01-01.
+
+
+
+
+See [LICENSE](LICENSE) for full details.
+
+For alternative licensing, [contact us](https://masiarek.pl/contact/?af_subject=Commercial+license+%E2%80%94+dashboard-kit-addon-geoip&af_message=Hello%2C+I+am+interested+in+a+commercial+license+for+dashboard-kit-addon-geoip.).
+
+
+
+## Authors
+
+- Rafał Masiarek | [website](https://masiarek.pl) | [github](https://github.com/rafalmasiarek)
 
 
 
@@ -536,24 +571,6 @@ Escapes a value for safe kv output. Strings with spaces or special characters ar
 </details>
 
 
-
-## License
-
-![License: BUSL-1.1](https://img.shields.io/badge/license-BUSL--1.1-red)
-
-Business Source License 1.1.
-
-Source available; commercial use restricted until 2099-01-01.
-
-
-For alternative licensing, contact: https://masiarek.pl/contact/?af_subject=Commercial+license+%E2%80%94+dashboard-kit-addon-geoip&af_message=Hello%2C+I+am+interested+in+a+commercial+license+for+dashboard-kit-addon-geoip.
-
-
-
-See [LICENSE](LICENSE) for full details.
-## Authors
-
-- Rafał Masiarek | [website](https://masiarek.pl) | [github](https://github.com/rafalmasiarek)
 
 
 <!-- references -->
