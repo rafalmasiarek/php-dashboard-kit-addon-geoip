@@ -25,7 +25,7 @@ context:
 
     Resolves the client IP to country, city, and region on every request. Stores results in `$_SERVER` (compatible with nginx `ngx_http_geoip_module`) and enriches all Monolog log channels with geo context fields.
 
-includes:
+footer_includes:
   - docs/usage.md
   - docs/reference.md
   - docs/api.md
