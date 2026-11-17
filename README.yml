@@ -2,7 +2,8 @@ name: dashboard-kit-addon-geoip
 repo_url: https://github.com/rafalmasiarek/php-dashboard-kit-addon-geoip
 license: BUSL-1.1
 license_change_date: "2099-01-01"
-license_contact: https://masiarek.pl/contact/?af_subject=Commercial+license+%E2%80%94+dashboard-kit-addon-geoip&af_message=Hello%2C+I+am+interested+in+a+commercial+license+for+dashboard-kit-addon-geoip.
+license_footer: |
+  For alternative licensing, [contact us](https://masiarek.pl/contact/?af_subject=Commercial+license+%E2%80%94+dashboard-kit-addon-geoip&af_message=Hello%2C+I+am+interested+in+a+commercial+license+for+dashboard-kit-addon-geoip.).
 
 badges:
   - name: Packagist Version
@@ -25,7 +26,7 @@ context:
 
     Resolves the client IP to country, city, and region on every request. Stores results in `$_SERVER` (compatible with nginx `ngx_http_geoip_module`) and enriches all Monolog log channels with geo context fields.
 
-includes:
+footer_includes:
   - docs/usage.md
   - docs/reference.md
   - docs/api.md
